@@ -3,15 +3,17 @@
 #include <SDL3/SDL_main.h>
 #include <iostream>
 
-#include "vec3.h"
-#include "ray.h"
-#include "color.h"
+#include "utils.h"
+
+#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
 
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 
 constexpr double aspect_ratio = 16.0/9.0;
-constexpr int image_width = 256;
+constexpr int image_width = 1280;
 constexpr int image_height = (int)(image_width/aspect_ratio);
 
 constexpr double view_height = 2.0;
@@ -30,26 +32,13 @@ pointV pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v)
 
 static SDL_FPoint points[image_width * image_height];
 
-double hit_sphere(const ray& r, const pointV& center, double radius)
-{
-    vec3 r2c = center - r.origin();
-    double a = dot(r.direction(), r.direction());
-    double w = dot(r.direction(), r2c);
-    double c = dot(r2c, r2c) - radius * radius;
-    double discriminant = w * w - a * c;
-    if (discriminant < 0) return -1.0;
-    else {
-        return (w - std::sqrt(discriminant))/a;
-    }
-}
+hittable_list world;
 
-colorV ray_color(const ray& r) {
+colorV ray_color(const ray& r, const hittable& world) {
 
-    double t = hit_sphere(r, pointV(0,0,-1), 0.5);
-    if (t > 0){
-        vec3 N = unit_vector(r.at(t) - pointV(0,0,-1));      
-        
-        return 0.5*colorV(N.x()+1, N.y()+1, N.z()+1);
+    hit_record rec;
+    if (world.hit(r, 0, infinity, rec)) {
+        return 0.5 * (rec.norm + colorV(1,1,1));
     }
     
 
@@ -78,6 +67,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         points[i].y = i / image_width;
     }
 
+    
+
+    world.add(std::make_shared<sphere>(pointV(0,0,-1), 0.5));
+    world.add(std::make_shared<sphere>(pointV(0,-100.5,-1), 100));
+
     return SDL_APP_CONTINUE;
 }
 
@@ -102,7 +96,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
             auto ray_direction = pixel_center - cam_loc;
             ray r(cam_loc, ray_direction);
 
-            colorV pC = ray_color(r);
+            colorV pC = ray_color(r, world);
 
             SDL_SetRenderDrawColor(renderer, pC.r(), pC.g(), pC.b(), SDL_ALPHA_OPAQUE); 
             SDL_RenderPoint(renderer, points[i + j * image_width].x, points[i + j * image_width].y);
