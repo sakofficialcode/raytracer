@@ -2,6 +2,7 @@
 #define VEC3_H
 
 #include <cmath>
+#include "random.h"
 
 class vec3 {
     public:
@@ -94,6 +95,25 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 inline vec3 unit_vector(const vec3& v) {
     return v / v.length();
 }
+
+inline vec3 rand_vec(double min, double max) {
+    return vec3(Random::getRand(min, max), Random::getRand(min, max), Random::getRand(min, max));
+}
+
+inline vec3 rand_unit_vec() {
+    return unit_vector(rand_vec(-1,1));
+}
+
+inline vec3 vec_on_surface(const vec3& normal) {
+    vec3 vec = rand_unit_vec();
+    if (dot(vec, normal) > 0.0) {
+        return vec;
+    } else {
+        return -vec;
+    }
+
+}
+
 
 using pointV = vec3;
 //using colorV = vec3;
