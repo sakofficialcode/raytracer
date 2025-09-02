@@ -3,11 +3,14 @@
 
 #include "ray.h"
 
+class material;
+
 class hit_record {
     public:
         pointV p;
         vec3 norm;
         double t;
+        std::shared_ptr<material> mat_ptr;
         bool front_face;
 
         void set_face_normal(const ray& r, const vec3& out_normal) {

@@ -25,4 +25,4 @@ namespace Random {
     }
 }
 
-#endif RANDOM_H
+#endif

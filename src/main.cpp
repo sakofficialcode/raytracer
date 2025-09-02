@@ -2,11 +2,14 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <iostream>
+#include <memory>
+
 
 #include "utils.h"
 
 #include "hittable.h"
 #include "hittable_list.h"
+#include "material.h"
 #include "sphere.h"
 
 static SDL_Window *window = NULL;
@@ -15,7 +18,7 @@ static SDL_Renderer *renderer = NULL;
 constexpr double aspect_ratio = 16.0/9.0;
 constexpr int image_width = 1280;
 constexpr int image_height = (int)(image_width/aspect_ratio);
-constexpr int samples_per_pixel = 1;
+constexpr int samples_per_pixel = 100;
 constexpr int max_depth = 50;
 
 constexpr double view_height = 2.0;
@@ -43,8 +46,17 @@ colorV ray_color(const ray& r, int depth, const hittable& world) {
 
     hit_record rec;
     if (world.hit(r, 0.001, infinity, rec)) {
+        /*
         vec3 direction = vec_on_surface(rec.norm) + rec.norm;
         return 0.5 * (ray_color(ray(rec.p, direction), depth-1, world));
+        */
+
+        ray scattered;
+        colorV attenuation;
+        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            return attenuation * ray_color(scattered, depth -1, world);
+        }
+        return colorV(0,0,0);
     }
     
 
@@ -75,8 +87,16 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     
 
-    world.add(std::make_shared<sphere>(pointV(0,0,-1), 0.5));
-    world.add(std::make_shared<sphere>(pointV(0,-100.5,-1), 100));
+    auto material_ground = std::make_shared<diffuse>(colorV(0.03, 0.28, 0.14));
+    auto material_center = std::make_shared<diffuse>(colorV(0.7, 0.2, 0.1));
+    auto material_left   = std::make_shared<metal>(colorV(0.8, 0.8, 0.8));
+    auto material_right  = std::make_shared<metal>(colorV(0.8, 0.6, 0.2));
+
+    world.add(std::make_shared<sphere>(pointV( 0.0, -100.5, -1.0), 100.0, material_ground));
+    world.add(std::make_shared<sphere>(pointV( 0.0,    0.0, -1.2),   0.5, material_center));
+    world.add(std::make_shared<sphere>(pointV(-1.0,    0.0, -1.0),   0.5, material_left));
+    world.add(std::make_shared<sphere>(pointV( 1.0,    0.0, -1.0),   0.5, material_right));
+
 
     SDL_RenderClear(renderer);
 

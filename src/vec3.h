@@ -43,6 +43,10 @@ class vec3 {
             return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
         }
 
+        bool near_zero() const {
+            double s = 1e-8;
+            return ((std::fabs(v[0]) < s) && (std::fabs(v[1]) < s) && (std::fabs(v[2]) < s));
+        }
 
     private:
         double v[3];
@@ -113,6 +117,12 @@ inline vec3 vec_on_surface(const vec3& normal) {
     }
 
 }
+
+inline vec3 reflect(const vec3& v, const vec3& n) {
+    return v - 2*dot(v,n)*n;
+}
+
+
 
 
 using pointV = vec3;

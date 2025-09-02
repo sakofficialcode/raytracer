@@ -2,11 +2,10 @@
 #define SPHERE_H
 
 #include "hittable.h"
-#include "vec3.h"
 
 class sphere : public hittable {
     public:
-        sphere(const pointV& center, double radius) : center(center), radius (std::fmax(0,radius)) {}
+        sphere(const pointV& center, double radius, std::shared_ptr<material> mat) : center(center), radius (std::fmax(0,radius)), mat(mat) {}
 
         bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const override {
             vec3 r2c = center - r.origin();
@@ -29,6 +28,7 @@ class sphere : public hittable {
             
             vec3 out_normal = (rec.p - center) / radius;
             rec.set_face_normal(r, out_normal);
+            rec.mat_ptr = mat;
 
             return true;
         }
@@ -36,6 +36,7 @@ class sphere : public hittable {
     private:
         pointV center;
         double radius;
+        std::shared_ptr<material> mat;
 
 };
 
