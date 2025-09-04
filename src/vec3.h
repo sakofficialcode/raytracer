@@ -122,6 +122,13 @@ inline vec3 reflect(const vec3& v, const vec3& n) {
     return v - 2*dot(v,n)*n;
 }
 
+inline vec3 refract(const vec3& v, const vec3& n, double etaI_etaT) {
+    double cos_theta = std::fmin(dot(-v,n), 1);
+    vec3 r_out_perp = etaI_etaT * (v + cos_theta*n);
+    vec3 r_out_para = -std::sqrt(std::fabs(1-r_out_perp.length_squared())) *n;
+    return r_out_perp + r_out_para;
+}
+
 
 
 
