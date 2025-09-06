@@ -33,10 +33,11 @@ class diffuse : public material {
 
 class metal : public material {
     public:
-        metal(const colorV& albedo) : albedo(albedo) {}
+        metal(const colorV& albedo, double fuzz) : albedo(albedo), fuzz(fuzz) {}
 
         bool scatter(const ray& r_in, const hit_record& rec, colorV& attenuation, ray& scattered) const override {
             vec3 reflected = reflect(r_in.direction(), rec.norm);
+            reflected = unit_vector(reflected) + (fuzz * rand_unit_vec());
             scattered = ray(rec.p, reflected);
             attenuation = albedo;
             return true;
@@ -44,6 +45,7 @@ class metal : public material {
         }
     private:
         colorV albedo;
+        double fuzz;
 };
 
 class dielectric : public material {
