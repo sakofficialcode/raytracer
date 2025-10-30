@@ -1,4 +1,4 @@
-# Simple Ray Tracer
+# Ray Tracer
 
 
 <p float="left">
