@@ -3,7 +3,9 @@
 
 #include <chrono>
 #include <random>
-#include <mutex>
+#include <algorithm>
+#include <limits>
+
 namespace Random {
     inline std::mt19937 generate()
     {
@@ -17,14 +19,21 @@ namespace Random {
     }
 
 
-    inline std::mt19937 mt{ generate() };
-    inline std::mutex mt_mutex;
+    inline thread_local std::mt19937 mt{ generate() };
+
+    template <typename T>
+    T getRandUnit(){
+        constexpr int bits = std::min(std::numeric_limits<T>::digits, 32);
+        constexpr T scale = T(1) / static_cast<T>(1ULL << bits);
+        constexpr int shift = (32 - bits);
+        
+        return (mt() >> shift) * scale;
+    }
 
     template <typename T>
     T getRand(T min, T max)
     {
-        std::lock_guard<std::mutex> lock(mt_mutex);
-        return std::uniform_real_distribution<T>{min, max}(mt);
+        return min + (max - min) * getRandUnit<T>();
     }
 }
 
