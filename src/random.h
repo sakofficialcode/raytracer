@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <random>
+#include <mutex>
 namespace Random {
     inline std::mt19937 generate()
     {
@@ -17,10 +18,12 @@ namespace Random {
 
 
     inline std::mt19937 mt{ generate() };
+    inline std::mutex mt_mutex;
 
     template <typename T>
     T getRand(T min, T max)
     {
+        std::lock_guard<std::mutex> lock(mt_mutex);
         return std::uniform_real_distribution<T>{min, max}(mt);
     }
 }

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <memory>
 #include <cmath> // For sin/cos
+#include <execution>
+#include <numeric>
 
 
 #include "utils.h"
@@ -75,8 +77,12 @@ void render_scene() {
     SDL_RenderClear(renderer);
 
     std::vector<colorV> framebuffer(image_width * camera.get_image_height());
+    
+    std::vector<int> rows(camera.get_image_height());
+    std::iota(rows.begin(), rows.end(), 0);
 
-    for (int j = 0; j < camera.get_image_height(); ++j) {
+
+    std::for_each(std::execution::par, rows.begin(), rows.end(), [&](int j) {
         for (int i = 0; i < camera.image_width; ++i) {
             colorV pixel_color(0,0,0);
             
@@ -92,7 +98,7 @@ void render_scene() {
 
             
         
-    }
+    });
 
 
     for (int i = 0; i < SDL_arraysize(points); i++) {
