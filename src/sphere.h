@@ -33,6 +33,10 @@ class sphere : public hittable {
             return true;
         }
 
+        aabb bounding_box() const override {
+            return aabb(center - vec3(radius, radius, radius), center + vec3(radius, radius, radius));
+        }
+
     private:
         pointV center;
         double radius;

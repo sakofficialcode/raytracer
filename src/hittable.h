@@ -2,7 +2,7 @@
 #define HITTABLE_H
 
 #include "ray.h"
-
+#include "aabb.h"
 class material;
 
 class hit_record {
@@ -25,6 +25,7 @@ class hittable {
 
         virtual bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const = 0;
 
+        virtual aabb bounding_box() const = 0;
 };
 
 #endif
